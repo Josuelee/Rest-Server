@@ -1,5 +1,7 @@
 const { request, response } = require("express");
 
+const User = require("../models/user");
+
 const getUsers = (req = request, res = response) => {
   const {
     q = "no query",
@@ -19,13 +21,17 @@ const getUsers = (req = request, res = response) => {
   });
 };
 
-const postUsers = (req, res = response) => {
+const postUsers = async (req, res = response) => {
   // esto no funciona sin el middleware de express.json() - acceder al body de la peticion
-  const { name, age } = req.body;
+  const body = req.body;
+
+  const user = new User(body);
+
+  await user.save();
+
   res.json({
     msg: "post api/users - controllers",
-    name,
-    age,
+    user,
   });
 };
 
