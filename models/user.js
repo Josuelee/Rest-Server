@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const User = Schema({
+const UserSchema = Schema({
   nombre: {
     type: String,
     required: [true, "El nombre es obligatorio"],
@@ -30,4 +30,12 @@ const User = Schema({
   },
 });
 
-module.exports = model("User", User);
+// Re escribir un metodo de mongoose - toJSON se ejecuta cuando alguna funcion javascript es ejecutada
+
+UserSchema.methods.toJSON = function () {
+  const { __v, pass, ...remainingUser } = this.toObject();
+
+  return remainingUser;
+};
+
+module.exports = model("User", UserSchema);

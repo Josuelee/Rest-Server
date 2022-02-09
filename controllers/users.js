@@ -1,38 +1,47 @@
 const { request, response } = require("express");
-
 const User = require("../models/user");
+const bcryptjs = require("bcryptjs");
 
-const getUsers = (req = request, res = response) => {
-  const {
-    q = "no query",
-    name = "no name",
-    age = "no age",
-    page = 1,
-    limit = 10,
-  } = req.query;
+const getUsers = async (req = request, res = response) => {
+  const { limit = 5, start = 0 } = req.query;
+  const query = { estado: true };
 
-  res.json({
-    msg: "get api/users - controllers",
-    q,
-    name,
-    age,
-    page,
-    limit,
-  });
+  const [total, user] = await Promise.all([
+    User.countDocuments(query),
+    User.find(query).limit(Number(limit)).skip(Number(start)),
+  ]);
+
+  res.json({ total, user });
 };
 
 const postUsers = async (req, res = response) => {
-  // esto no funciona sin el middleware de express.json() - acceder al body de la peticion
-  const body = req.body;
+  const { nombre, pass, correo, rol } = req.body;
+  const user = new User({ nombre, pass, correo, rol });
 
-  const user = new User(body);
+  // Encriptar password
+  const salt = bcryptjs.genSaltSync();
+  user.pass = bcryptjs.hashSync(pass, salt);
 
+  // guardar
   await user.save();
-
   res.json({
-    msg: "post api/users - controllers",
     user,
   });
+};
+
+const putUsers = async (req, res = response) => {
+  // edita los datos del id que le enviamos en la request
+  const { id } = req.params;
+  const { _id, google, pass, correo, ...rest } = req.body;
+
+  if (pass) {
+    const salt = bcryptjs.genSaltSync();
+    rest.pass = bcryptjs.hashSync(pass, salt);
+  }
+
+  const user = await User.findByIdAndUpdate(id, rest);
+
+  res.json(user);
 };
 
 const patchUsers = (req, res = response) => {
@@ -41,17 +50,16 @@ const patchUsers = (req, res = response) => {
   });
 };
 
-const putUsers = (req, res = response) => {
+const deleteUsers = async (req, res = response) => {
   const { id } = req.params;
-  res.json({
-    msg: "put api/users - controllers",
-    id,
-  });
-};
 
-const deleteUsers = (req, res = response) => {
+  // eliminar de la base de datos
+  // const usuario = await User.findByIdAndDelete(id);
+
+  const usuario = await User.findByIdAndUpdate(id, { estado: false });
   res.json({
-    msg: "delete api/users - controllers",
+    msg: "Eliminado correctamente",
+    usuario,
   });
 };
 
