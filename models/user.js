@@ -33,7 +33,9 @@ const UserSchema = Schema({
 // Re escribir un metodo de mongoose - toJSON se ejecuta cuando alguna funcion javascript es ejecutada
 
 UserSchema.methods.toJSON = function () {
-  const { __v, pass, ...remainingUser } = this.toObject();
+  const { __v, pass, _id, ...remainingUser } = this.toObject();
+
+  remainingUser.uid = _id;
 
   return remainingUser;
 };

@@ -53,10 +53,8 @@ const patchUsers = (req, res = response) => {
 const deleteUsers = async (req, res = response) => {
   const { id } = req.params;
 
-  // eliminar de la base de datos
-  // const usuario = await User.findByIdAndDelete(id);
-
   const usuario = await User.findByIdAndUpdate(id, { estado: false });
+
   res.json({
     msg: "Eliminado correctamente",
     usuario,

@@ -1,11 +1,19 @@
 const { Router } = require("express");
 const { body, check } = require("express-validator");
-const { fieldsValidate } = require("../middlewares/fields-validate");
+
+const {
+  fieldsValidate,
+  validateJWT,
+  isAdmin,
+  useRoles,
+} = require("../middlewares");
+
 const {
   isValidRole,
   emailExist,
   existUserById,
 } = require("../helpers/db-validators");
+
 const {
   getUsers,
   postUsers,
@@ -49,6 +57,9 @@ router.patch("/", patchUsers);
 router.delete(
   "/:id",
   [
+    validateJWT,
+    // isAdmin,
+    useRoles("ADMIN_ROLE", "VENTAS_ROLE"),
     check("id", "No es un ID valido de MONGO").isMongoId(),
     check("id").custom(existUserById),
     fieldsValidate,
@@ -61,5 +72,4 @@ module.exports = router;
 //cuando quiero usar middlewares en mis rutas, se usa el segundo parametro
 // si quiero usar mas de 1 middleware entonces los ejecuto dentro de un arreglo
 //  body es un middleware que validara todos los campos del body de la request
-
 // body("rol", "Ese rol no es valido").isIn(["ADMIN_ROL", "USER_ROL"])-para validar roles
