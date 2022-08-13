@@ -1,3 +1,9 @@
-# Web Server + Rest Server
+# Restful API
 
-Se debe ejecutar el `npm install` para reconstruir los módulos de Node.
+## Technologies
+
+- Node.js
+- Express.js
+- MongoDB
+- OAuth 2.0
+- Middlewares
