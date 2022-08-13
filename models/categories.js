@@ -18,4 +18,10 @@ const categorieSchema = Schema({
   },
 });
 
+categorieSchema.methods.toJSON = function () {
+  const { __v, estado, ...remainingCategory } = this.toObject();
+
+  return remainingCategory;
+};
+
 module.exports = model("Categorie", categorieSchema);

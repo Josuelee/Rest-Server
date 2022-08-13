@@ -1,8 +1,16 @@
 const { Router } = require("express");
-const { body } = require("express-validator");
-const { createCategory, getCategories } = require("../controllers/categories");
+const { body, check } = require("express-validator");
+const {
+  createCategory,
+  getCategories,
+  getCategory,
+  updateCategory,
+  deleteCategory,
+} = require("../controllers/categories");
+
+const { existCategoryById } = require("../helpers/db-validators");
 const { fieldsValidate } = require("../middlewares/validate-fields");
-const { validateJWT } = require("../middlewares/validate-jwt");
+const { validateJWT, isAdmin } = require("../middlewares/");
 
 const router = Router();
 
@@ -10,9 +18,15 @@ const router = Router();
 router.get("/", getCategories);
 
 // Obtener una categoria por id - publico
-router.get("/:id", (req, res) => {
-  res.json("get - id");
-});
+router.get(
+  "/:id",
+  [
+    check("id", "No es un id valido de MONGO").isMongoId(),
+    check("id").custom(existCategoryById),
+    fieldsValidate,
+  ],
+  getCategory
+);
 
 // Guardar una categoria - Privado: solo personas con token valido
 router.post(
@@ -26,13 +40,29 @@ router.post(
 );
 
 // Actualizar categoria - Privado: Solo personas con token valido
-router.put("/:id", (req, res) => {
-  res.json("put");
-});
+router.put(
+  "/:id",
+  [
+    validateJWT,
+    body("nombre", "Tiene que ingresar su nuevo nombre").not().isEmpty(),
+    check("id", "No es un id valido de MONGO").isMongoId(),
+    check("id").custom(existCategoryById),
+    fieldsValidate,
+  ],
+  updateCategory
+);
 
 // Eliminar catetegoria - Privado: Solo administrador
-router.delete("/:id", (req, res) => {
-  res.json("delete");
-});
+router.delete(
+  "/:id",
+  [
+    validateJWT,
+    isAdmin,
+    check("id", "No es un id valido de MONGO").isMongoId(),
+    check("id").custom(existCategoryById),
+    fieldsValidate,
+  ],
+  deleteCategory
+);
 
 module.exports = router;

@@ -3,7 +3,7 @@ const { response } = require("express");
 const isAdmin = (req, res = response, next) => {
   if (!req.authUser) {
     return res.status(500).json({
-      msg: "Se quiere verificar rol sin verificar token primero",
+      msg: "no se puede verificar rol sin verificar token primero",
     });
   }
 
